@@ -10,7 +10,8 @@ void updates() {
       seconds = 0;
       minutes += 1;
     }
-    if((seconds == 8) && (minutes == 2)) {
+
+    if(minutes > 9) {
       frameCounter = 0;
       seconds = 0;
       minutes = 0;
@@ -19,6 +20,15 @@ void updates() {
       electricX = SquareNoseX;
       electricY = SquareNoseY;
     }
+/*    if((seconds == 8) && (minutes == 2)) {
+      frameCounter = 0;
+      seconds = 0;
+      minutes = 0;
+      gb.sound.playCancel();
+      electricShock = true;
+      electricX = SquareNoseX;
+      electricY = SquareNoseY;
+    }*/
   }
 
 // stop Square Nose when hit a wall
@@ -51,6 +61,11 @@ void updates() {
       if((gb.collide.rectRect(SquareNoseX + 1, SquareNoseY + 1, 8, 8, meatyRingX, meatyRingY, 8, 8)) && (electricShock == false)) {
         meatyRingX = random(gb.display.width() - 8);
         meatyRingY = random((gb.display.width() / 2) - 8);
+// move the new meaty ring a second time if directly colliding again to make the game more fair
+        if((gb.collide.rectRect(SquareNoseX + 1, SquareNoseY + 1, 8, 8, meatyRingX, meatyRingY, 8, 8)) && (electricShock == false)) {
+          meatyRingX = random(gb.display.width() - 8);
+          meatyRingY = random((gb.display.width() / 2) - 8);
+        }
         gb.sound.playOK();
         collectedMeatyRings += 1;
       }
@@ -91,14 +106,19 @@ void updates() {
         electricX = SquareNoseX;
         electricY = SquareNoseY;
         gb.sound.playCancel();
+        if (playLethalMouse == true) {
+          deadBird = true;
+        }
       }
     
 // bird speed
-      if(birdGoesRight == true) {
-        birdX += 2;
-      } else {
-        birdX -= 2;
-      }
+//      if(deadBird == false) {
+        if(birdGoesRight == true) {
+          birdX += 2;
+        } else {
+          birdX -= 2;
+        }
+//      }
 
 // bird hits the wall
       if(birdX < 1) {
@@ -117,14 +137,19 @@ void updates() {
         electricX = SquareNoseX;
         electricY = SquareNoseY;
         gb.sound.playCancel();
+        if (playLethalMouse == true) {
+          deadBug = true;
+        }
       }
       
 // bug speed
-      if(bugGoesRight == true) {
-        bugX += (1 + random(0, 2 + gameLoop));
-      } else {
-        bugX -= (1 + random(0, 2 + gameLoop));
-      }
+//      if(deadBug == false) {
+        if(bugGoesRight == true) {
+          bugX += (1 + random(0, 2 + gameLoop));
+        } else {
+          bugX -= (1 + random(0, 2 + gameLoop));
+        }
+//      }
 
 // bug hits the wall
       if(bugX < 1) {
@@ -145,24 +170,31 @@ void updates() {
         electricX = SquareNoseX;
         electricY = SquareNoseY;
         gb.sound.playCancel();
+        if (playLethalMouse == true) {
+          deadFrog = true;
+        }
       }
 
 // frog jumps every two seconds in loop zero, every 1.5 seconds in loop 1 and always in loop 2
-      switch(gameLoop) {
-        case 0:
-          if(((seconds % 2) == 0) && (frameCounter == 1)) {
+//      if(deadFrog == false) {
+        switch(gameLoop) {
+          case 0:
+            if(((seconds % 2) == 0) && (frameCounter == 1)) {
+              if(!((minutes == 0) && (seconds == 0))) {
+                frogIsJumping = true;
+              }
+            }
+            break;
+          case 1:
+            if((((seconds % 3) == 0) && (frameCounter == 1)) || ((((seconds - 1) % 3) == 0) && (frameCounter == 13))) {
+              frogIsJumping = true;
+            }
+            break;
+          default:
             frogIsJumping = true;
-          }
-          break;
-        case 1:
-          if((((seconds % 3) == 0) && (frameCounter == 1)) || ((((seconds - 1) % 3) == 0) && (frameCounter == 13))) {
-            frogIsJumping = true;
-          }
-          break;
-        default:
-          frogIsJumping = true;
-          break;
+            break;
         }
+//      }
 
 // frog horizontal moves (faster at loop 3 and the next ones)
       if(frogIsJumping == true) {
@@ -220,6 +252,9 @@ void updates() {
         electricX = SquareNoseX;
         electricY = SquareNoseY;
         gb.sound.playCancel();
+        if (playLethalMouse == true) {
+          deadSquiddy = true;
+        }
       }
 
 // Squiddy ball contact
@@ -228,6 +263,9 @@ void updates() {
         electricX = SquareNoseX;
         electricY = SquareNoseY;
         gb.sound.playCancel();
+        if (playLethalMouse == true) {
+          deadSquareNoseBall = true;
+        }
       }
       
 // angle goes from 0 to 360
@@ -237,13 +275,15 @@ void updates() {
       }
 
 // Squiddy and its ball moves depending on each other
-      if(SquiddySpins == true) {
-        SquiddyX = SquiddyBallX + cos(angle * PI / 180) * 30;
-        SquiddyY = SquiddyBallY + sin(angle * PI / 180) * 30;
-      } else {
-        SquiddyBallX = SquiddyX + cos(angle * PI / 180) * 30;
-        SquiddyBallY = SquiddyY + sin(angle * PI / 180) * 30;
-      }
+//      if((deadSquiddy == false) && (deadSquareNoseBall == false)) {
+        if(SquiddySpins == true) {
+          SquiddyX = SquiddyBallX + cos(angle * PI / 180) * 30;
+          SquiddyY = SquiddyBallY + sin(angle * PI / 180) * 30;
+        } else {
+          SquiddyBallX = SquiddyX + cos(angle * PI / 180) * 30;
+          SquiddyBallY = SquiddyY + sin(angle * PI / 180) * 30;
+        }
+//      }
 
 // invert rotation center
       if((SquiddySpins == true) && ((SquiddyX < -1) || (SquiddyX > 71) || (SquiddyY < -1) || (SquiddyY > 31))) {
@@ -322,4 +362,35 @@ void resetValues() {
     endOfTest = false;
     handGoesDown = true;
     handY = -22;
+    LethalMouseMoves = false;
+// reset the timer
+/*
+    frameCounter = 0;
+      seconds = 0;
+      minutes = 0;
+*/
+    deadBird = false;
+    deadBug = false;
+    deadFrog = false;
+    deadSquiddy = false;
+    deadSquareNoseBall = false;
+}
+
+void explosion(int x, int y, int w, int h) {
+  colorNumber = random(4);
+  switch (colorNumber) {
+    case 0:
+      gb.display.setColor(WHITE);
+      break;
+    case 1:
+      gb.display.setColor(YELLOW);
+      break;
+    case 2:
+      gb.display.setColor(ORANGE);
+      break;
+    case 3:
+      gb.display.setColor(RED);
+      break;
+  }
+  gb.display.fillCircle(x + random(w + 1), y + random(h + 1), random(6));
 }
