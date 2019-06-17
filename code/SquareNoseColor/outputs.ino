@@ -1,12 +1,26 @@
 void outputs() {
 // blue sky in level 0, gray background in others
   if(level == 0) {
-    gb.display.setColor(BLUE);
+    if(playLethalMouse == true) {
+      gb.display.setColor(DARKGRAY);
+    } else {
+      gb.display.setColor(BLUE);
+    }
     gb.display.fillRect(0, 0, 80, 18);
     gb.display.fillRect(0, 20, 80, 2);
-    gb.display.setColor(LIGHTBLUE);
+    if(playLethalMouse == true) {
+      gb.display.setColor(GRAY);
+    } else {
+      gb.display.setColor(LIGHTBLUE);
+    }
     gb.display.fillRect(0, 18, 80, 2);
     gb.display.fillRect(0, 22, 80, 18);
+// draw cloud and bushes like in Super Mario Bros
+/*    gb.display.drawImage(42, 7, cloud);
+    gb.display.drawImage(46, 32, bush);
+    gb.display.drawImage(55, 32, bush);
+    gb.display.drawImage(64, 32, bush);
+*/
   } else {
     gb.display.setColor(GRAY);
     gb.display.fillRect(0, 0, gb.display.width(), gb.display.width()/2);
@@ -58,28 +72,33 @@ void outputs() {
 
 // meaty rings counter in the center of the test chamber
   if(level != 0) {
+// draw the shadow of the numbers
     gb.display.setFontSize(2);
     gb.display.setColor(DARKGRAY);
     gb.display.setCursor(34, 16);
     if(collectedMeatyRings < 10) {
       gb.display.print("0");
-      gb.display.print(collectedMeatyRings);
-    } else {
-      gb.display.print(collectedMeatyRings);
     }
+    gb.display.print(collectedMeatyRings);
+// draw the orange numbers
     gb.display.setColor(ORANGE);
     gb.display.setCursor(33, 15);
     if(collectedMeatyRings < 10) {
       gb.display.print("0");
-      gb.display.print(collectedMeatyRings);
-    } else {
-      gb.display.print(collectedMeatyRings);
     }
+    gb.display.print(collectedMeatyRings);
   }
 
-// draw meaty ring
+// draw meaty ring or blue target
   if((level != 0) && (endOfTest == false)) {
-    gb.display.drawImage(meatyRingX, meatyRingY, meatyRing);
+    if(playLethalMouse == true) {
+//      if((deadBird == false) && (deadBug == false) && (deadFrog == false) && (deadSquiddy == false) && (deadSquareNoseBall == false)) {
+      if(electricShock == false) {
+        gb.display.drawImage(meatyRingX, meatyRingY, blueTarget);
+      }
+    } else {
+      gb.display.drawImage(meatyRingX, meatyRingY, meatyRing);
+    }
   }
 
 // draw animals
@@ -92,11 +111,19 @@ void outputs() {
         gb.display.drawImage(birdX, BIRD_Y, birdLeft);
       }
 
+      if(deadBird == true) {
+        explosion(birdX, BIRD_Y, 11, 8);
+      }
+
 // bug
       if(bugGoesRight == true) {
         gb.display.drawImage(bugX, BUG_Y, bugRight);
       } else {
         gb.display.drawImage(bugX, BUG_Y, bugLeft);
+      }
+
+      if(deadBug == true) {
+        explosion(bugX, BUG_Y, 9, 7);
       }
       break;
 
@@ -107,73 +134,140 @@ void outputs() {
       } else {
         gb.display.drawImage(frogX, frogY, frogGround);
       }
+
+      if(deadFrog == true) {
+        explosion(frogX, frogY, 12, 12);
+      }
       break;
 
     case 3:
 // Squiddy
       gb.display.drawImage(SquiddyX, SquiddyY, Squiddy);
-      gb.display.drawImage(SquiddyBallX, SquiddyBallY, SquiddyBall);
+      if(deadSquiddy == true) {
+        explosion(SquiddyX, SquiddyY, 10, 10);
+      }
+      if(playLethalMouse == true) {
+        gb.display.drawImage(SquiddyBallX, SquiddyBallY, SquareNoseBall);
+        if(deadSquareNoseBall == true) {
+        explosion(SquiddyBallX, SquiddyBallY, 10, 10);
+      }
+      } else {
+        gb.display.drawImage(SquiddyBallX, SquiddyBallY, SquiddyBall);
+      }
       break;
   }
 
-// draw Square Nose
-  if(handGoesDown == true) {
-    if(electricShock == false) {
+// draw Lethal Mouse or Square Nose
+
+  if(playLethalMouse == true) {
+    // draw Lethal Mouse
+    if(handGoesDown == true) {
       if(SquareNoseGoesRight == true) {
         if(SquareNoseIsJumping == true) {
-          gb.display.drawImage(SquareNoseX, SquareNoseY, SN_ball_clock);
+          gb.display.drawImage(SquareNoseX, SquareNoseY, SquiddyBall);
         } else {
           if(gb.buttons.repeat(BUTTON_RIGHT, 0)) {
-            if(gb.buttons.repeat(BUTTON_DOWN, 0)) {
-              gb.display.drawImage(SquareNoseX, SquareNoseY, SN_ball_clock);
+            if((gb.buttons.repeat(BUTTON_DOWN, 0)) && (electricShock == false)) {
+              gb.display.drawImage(SquareNoseX, SquareNoseY, SquiddyBall);
             } else {
-              gb.display.drawImage(SquareNoseX, SquareNoseY, SquareNoseRunsRight);
+              gb.display.drawImage(SquareNoseX, SquareNoseY, LethalMouseRunsRight);
             }
           } else {
-            if(gb.buttons.repeat(BUTTON_DOWN, 0)) {
-              gb.display.drawImage(SquareNoseX, SquareNoseY, SquareNoseBall);
+            if((gb.buttons.repeat(BUTTON_DOWN, 0)) && (electricShock == false)) {
+              gb.display.drawImage(SquareNoseX, SquareNoseY, SquiddyBall);
             } else {
-              gb.display.drawImage(SquareNoseX, SquareNoseY, SquareNoseRight);
+              if(LethalMouseMoves == true) {
+                gb.display.drawImage(SquareNoseX, SquareNoseY, LethalMouseRunsRight);
+              } else {
+                gb.display.drawImage(SquareNoseX, SquareNoseY, LethalMouseBlinkRight);
+              }
             }
           }
         }
       } else {
         if(SquareNoseIsJumping == true) {
-          gb.display.drawImage(SquareNoseX, SquareNoseY, SN_ball_counter_clock);
+          gb.display.drawImage(SquareNoseX, SquareNoseY, SquiddyBall);
         } else {
           if(gb.buttons.repeat(BUTTON_LEFT, 0)) {
-            if(gb.buttons.repeat(BUTTON_DOWN, 0)) {
-              gb.display.drawImage(SquareNoseX, SquareNoseY, SN_ball_counter_clock);
+            if((gb.buttons.repeat(BUTTON_DOWN, 0)) && (electricShock == false)) {
+              gb.display.drawImage(SquareNoseX, SquareNoseY, SquiddyBall);
             } else {
-              gb.display.drawImage(SquareNoseX, SquareNoseY, SquareNoseRunsLeft);
+              gb.display.drawImage(SquareNoseX, SquareNoseY, LethalMouseRunsLeft);
             }
           } else {
-            if(gb.buttons.repeat(BUTTON_DOWN, 0)) {
-              gb.display.drawImage(SquareNoseX, SquareNoseY, SquareNoseBall);
+            if((gb.buttons.repeat(BUTTON_DOWN, 0)) && (electricShock == false)) {
+              gb.display.drawImage(SquareNoseX, SquareNoseY, SquiddyBall);
             } else {
-              gb.display.drawImage(SquareNoseX, SquareNoseY, SquareNoseLeft);
+              if(LethalMouseMoves == true) {
+                gb.display.drawImage(SquareNoseX, SquareNoseY, LethalMouseRunsLeft);
+              } else {
+                gb.display.drawImage(SquareNoseX, SquareNoseY, LethalMouseBlinkLeft);
+              }
             }
           }
         }
       }
+    }
+  } else {
+// draw Square Nose
+    if(handGoesDown == true) {
+      if(electricShock == false) {
+        if(SquareNoseGoesRight == true) {
+          if(SquareNoseIsJumping == true) {
+            gb.display.drawImage(SquareNoseX, SquareNoseY, SN_ball_clock);
+          } else {
+            if(gb.buttons.repeat(BUTTON_RIGHT, 0)) {
+              if(gb.buttons.repeat(BUTTON_DOWN, 0)) {
+                gb.display.drawImage(SquareNoseX, SquareNoseY, SN_ball_clock);
+              } else {
+                gb.display.drawImage(SquareNoseX, SquareNoseY, SquareNoseRunsRight);
+              }
+            } else {
+              if(gb.buttons.repeat(BUTTON_DOWN, 0)) {
+                gb.display.drawImage(SquareNoseX, SquareNoseY, SquareNoseBall);
+              } else {
+                gb.display.drawImage(SquareNoseX, SquareNoseY, SquareNoseRight);
+              }
+            }
+          }
+        } else {
+          if(SquareNoseIsJumping == true) {
+            gb.display.drawImage(SquareNoseX, SquareNoseY, SN_ball_counter_clock);
+          } else {
+            if(gb.buttons.repeat(BUTTON_LEFT, 0)) {
+              if(gb.buttons.repeat(BUTTON_DOWN, 0)) {
+                gb.display.drawImage(SquareNoseX, SquareNoseY, SN_ball_counter_clock);
+              } else {
+                gb.display.drawImage(SquareNoseX, SquareNoseY, SquareNoseRunsLeft);
+              }
+            } else {
+              if(gb.buttons.repeat(BUTTON_DOWN, 0)) {
+                gb.display.drawImage(SquareNoseX, SquareNoseY, SquareNoseBall);
+              } else {
+                gb.display.drawImage(SquareNoseX, SquareNoseY, SquareNoseLeft);
+              }
+            }
+          }
+        }
       } else {
         gb.display.drawImage(electricX, electricY, SquareNoseElectric);
       }
+    }
   }
-
+  
 // draw timer at the bottom of the screen
   if(level != 0) {
     gb.display.setFontSize(3);
 // make a sound the last tenth seconds before time over
 //(128 seconds or 2 minutes and 8 seconds)
-    if(((minutes == 1) && (seconds == 59)) || (minutes == 2)) {
-      if(frameCounter == 0) {
-        gb.sound.playTick();
-      }
-      gb.display.setColor(ORANGE);
-    } else {
+//    if(((minutes == 1) && (seconds == 59)) || (minutes == 2)) {
+//      if(frameCounter == 0) {
+//        gb.sound.playTick();
+//      }
+//      gb.display.setColor(ORANGE);
+//    } else {
       gb.display.setColor(DARKGRAY);
-    }
+//    }
     gb.display.setCursor(6,45);
     gb.display.print(minutes);
     gb.display.setCursor(18,45);
@@ -186,11 +280,11 @@ void outputs() {
     gb.display.print("s");
     gb.display.setCursor(66,45);
     gb.display.print((frameCounter / 5) * 2);
-    if(((minutes == 1) && (seconds == 59)) || (minutes == 2)) {
-      gb.display.setColor(RED);
-    } else {
+//    if(((minutes == 1) && (seconds == 59)) || (minutes == 2)) {
+//      gb.display.setColor(RED);
+//    } else {
       gb.display.setColor(GRAY);
-    }
+//    }
     gb.display.setCursor(5,44);
     gb.display.print(minutes); 
     gb.display.setCursor(17,44);
@@ -207,9 +301,17 @@ void outputs() {
 
 // draw ground in level 0
   if(level == 0) {
-    gb.display.setColor(ORANGE);
+    if(playLethalMouse == true) {
+      gb.display.setColor(GRAY);
+    } else {
+      gb.display.setColor(ORANGE);
+    }
     gb.display.fillRect(0, 47, 80, 17);
-    gb.display.setColor(BROWN);
+    if(playLethalMouse == true) {
+      gb.display.setColor(DARKGRAY);
+    } else {
+      gb.display.setColor(BROWN);
+    }
     for(int row = 0; row < 2; row += 1) {
       for(int column = 0; column < 5; column += 1) {
         int brickX = column * 16;
@@ -218,9 +320,17 @@ void outputs() {
         gb.display.fillRect(brickX + 8, brickY + 8, 8, 8);
       }
     }
-    gb.display.setColor(GREEN);
+    if(playLethalMouse == true) {
+      gb.display.setColor(BLACK);
+    } else {
+      gb.display.setColor(GREEN);
+    }
     gb.display.fillRect(0, 40, 80, 7);
-    gb.display.setColor(LIGHTGREEN);
+    if(playLethalMouse == true) {
+      gb.display.setColor(YELLOW);
+    } else {
+      gb.display.setColor(LIGHTGREEN);
+    }
     for(int column = 0; column < 10; column += 1) {
       int brickX = column * 8;
       gb.display.fillRect(brickX, 40, 4, 7);
@@ -239,6 +349,10 @@ void outputs() {
   if(handGoesDown) {
     gb.display.drawImage(SquareNoseX, handY, openHand);
   } else {
-    gb.display.drawImage(SquareNoseX, handY, closedHand);
+    if(playLethalMouse == true) {
+      gb.display.drawImage(SquareNoseX, handY, LethalMouseCaptured);
+    } else {
+      gb.display.drawImage(SquareNoseX, handY, closedHand);
+    }
   }
 }
