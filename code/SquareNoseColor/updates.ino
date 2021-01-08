@@ -1,6 +1,6 @@
 void updates() {
 // timer
-  if((level != 0) && (electricShock == false) && (endOfTest == false)) {
+  if((level != 0) && (electricShock == false) && (endOfTest == false) && (level != 4)) {
     frameCounter += 1;
     if(frameCounter > 24) {
       frameCounter = 0;
@@ -10,7 +10,6 @@ void updates() {
       seconds = 0;
       minutes += 1;
     }
-
     if(minutes > 9) {
       frameCounter = 0;
       seconds = 0;
@@ -31,7 +30,7 @@ void updates() {
     }*/
   }
 
-// stop Square Nose when hit a wall
+// stop Square Nose (player) when hit a wall
   if(SquareNoseX < 1) {
     SquareNoseX = 0;
   }
@@ -39,7 +38,15 @@ void updates() {
     SquareNoseX = 70;
   }
 
-// Square Nose jump
+// stop CPU when hit a wall
+  if(CPUX < 1) {
+    CPUX = 0;
+  }
+  if(CPUX > 69) {
+    CPUX = 70;
+  }
+  
+// Square Nose (player) jump
   if(SquareNoseIsJumping == true) {
     SquareNoseY += SquareNoseJumpSpeed;
     SquareNoseJumpCounter += 1;
@@ -48,27 +55,75 @@ void updates() {
     }
   }
 
-// stop Square Nose falling when hit the ground
+// CPU jump
+  if(CPUIsJumping == true) {
+    CPUY += CPUJumpSpeed;
+    CPUJumpCounter += 1;
+    if((CPUJumpCounter % 2) == 0) {
+      CPUJumpSpeed += 2;
+    }
+  }
+  
+// stop Square Nose (player) falling when hit the ground
   if((SquareNoseY > 28) && (SquareNoseIsJumping == true)) {
     SquareNoseY = 28;
     SquareNoseIsJumping = false;
     SquareNoseJumpCounter = 0;
   }
 
+// stop CPU falling when hit the ground
+  if((CPUY > 28) && (CPUIsJumping == true)) {
+    CPUY = 28;
+    CPUIsJumping = false;
+    CPUJumpCounter = 0;
+  }
+
 // new meaty ring
   if(level != 0) {
     if(endOfTest == false) {
-      if((gb.collide.rectRect(SquareNoseX + 1, SquareNoseY + 1, 8, 8, meatyRingX, meatyRingY, 8, 8)) && (electricShock == false)) {
-        meatyRingX = random(gb.display.width() - 8);
-        meatyRingY = random((gb.display.width() / 2) - 8);
+      if(level == 4) {
+        if((gb.collide.rectRect(CPUX + 1, CPUY + 1, 8, 8, meatyRingX, meatyRingY, 8, 8)) && (CPUElectricShock == false)) {
+// stop CPU from chasing target after catching one
+          CPUChasing = false;
+// set the targets near the walls every 4 spawns to force player to dodge the boss
+          if((collectedMeatyRings % 4) == 0) {
+            if(SquareNoseX < 35) {
+              meatyRingX = 0;
+            } else {
+              meatyRingX = gb.display.width() - 8;
+            }
+          } else {
+            meatyRingX = random(gb.display.width() - 8);
+          }
+          meatyRingY = random((gb.display.width() / 2) - 8);
 // move the new meaty ring a second time if directly colliding again to make the game more fair
+          if((gb.collide.rectRect(CPUX + 1, CPUY + 1, 8, 8, meatyRingX, meatyRingY, 8, 8)) && (CPUElectricShock == false)) {
+            meatyRingX = random(gb.display.width() - 8);
+            meatyRingY = random((gb.display.width() / 2) - 8);
+          }
+          gb.sound.playOK();
+          collectedMeatyRings += 1;
+        }
+      } else {
         if((gb.collide.rectRect(SquareNoseX + 1, SquareNoseY + 1, 8, 8, meatyRingX, meatyRingY, 8, 8)) && (electricShock == false)) {
           meatyRingX = random(gb.display.width() - 8);
           meatyRingY = random((gb.display.width() / 2) - 8);
+// move the new meaty ring a second time if directly colliding again to make the game more fair
+          if((gb.collide.rectRect(SquareNoseX + 1, SquareNoseY + 1, 8, 8, meatyRingX, meatyRingY, 8, 8)) && (electricShock == false)) {
+            meatyRingX = random(gb.display.width() - 8);
+            meatyRingY = random((gb.display.width() / 2) - 8);
+          }
+          gb.sound.playOK();
+          collectedMeatyRings += 1;
         }
-        gb.sound.playOK();
-        collectedMeatyRings += 1;
       }
+    }
+  } else { // level 0
+    if(gb.collide.rectRect(SquareNoseX + 1, SquareNoseY + 1, 8, 8, meatyRingX, meatyRingY, 8, 8)) {
+      if(endOfTest == false) {
+        gb.sound.playOK();
+      }
+      endOfTest = true;
     }
   }
 
@@ -86,9 +141,15 @@ void updates() {
     }
   }
   
-// when doctor Meggan hand catches Square Nose
-  if(handY > (SquareNoseY - 4)) {
-    handGoesDown = false;
+// when doctor Meggan hand catches Square Nose (player) or Squiddy
+  if(level == 3) {
+    if(handY > (SquiddyY - 4)) {
+      handGoesDown = false;
+    }
+  } else {
+    if(handY > (SquareNoseY - 4)) {
+      handGoesDown = false;
+    }
   }
 
 // doctor Meggan hand and Square Nose are out of screen and you go to next screen
@@ -269,9 +330,11 @@ void updates() {
       }
       
 // angle goes from 0 to 360
-      angle -= 3 + gameLoop;
-      if(angle < 0) {
-        angle = 359;
+      if(handGoesDown == true) {
+        angle -= 3 + gameLoop;
+        if(angle < 0) {
+          angle = 359;
+        }
       }
 
 // Squiddy and its ball moves depending on each other
@@ -329,6 +392,19 @@ void updates() {
         angle -= 360;
       }
       break;
+
+    case 4:
+      // player and CPU (Square Nose and Lethal Mouse) contact
+      if((endOfTest == false) && (gb.collide.rectRect(SquareNoseX + 1, SquareNoseY + 1, 8, 8, CPUX + 1, CPUY + 1, 8, 8)) && (electricShock == false)) {
+        electricShock = true;
+        electricX = SquareNoseX;
+        electricY = SquareNoseY;
+        CPUElectricShock = true;
+        CPUElectricX = CPUX;
+        CPUElectricY = CPUY;
+        gb.sound.playCancel();
+      } 
+      break;
   }
 }
 
@@ -374,6 +450,27 @@ void resetValues() {
     deadFrog = false;
     deadSquiddy = false;
     deadSquareNoseBall = false;
+    
+// CPU
+    CPUX = 54;
+    CPUY = 28;
+    CPUGoesRight = false;
+    CPUIsJumping = false;
+    CPUJumpSpeed = 0;
+    CPUJumpCounter = 0;
+    CPUElectricShock = false;
+    CPUElectricX = 0;
+    CPUElectricY = 0;
+    CPUChasing = false;
+    CPUDelay = 0;
+// CPU virtual buttons
+    CPU_LEFT = false;
+    CPU_RIGHT = false;
+    CPU_DOWN = false;
+    CPU_A = false;
+    CPU_pressedA = false;
+    CPU_releasedA = false;
+    LethalMouseCPUMoves = false;
 }
 
 void explosion(int x, int y, int w, int h) {
