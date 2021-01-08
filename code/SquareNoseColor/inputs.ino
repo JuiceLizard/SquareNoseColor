@@ -1,10 +1,16 @@
 void inputs() {
 
 // "start"
+// 06-02-2020 change: doctor Meggan hand comes
+// when you catch the meaty ring or blue target
+/*
   if((gb.buttons.pressed(BUTTON_A)) && (level == 0)) {
      endOfTest = true;
   }
-
+*/
+// 06-02-2020 change: place this part after the inputs() updates() outputs()
+// to avoid a level 0 screen during one frame after death
+/*
 // restart the game if you lose
   if((electricShock == true) && (gb.buttons.pressed(BUTTON_A))) {
         level = 0;
@@ -15,6 +21,7 @@ void inputs() {
         minutes = 0;
         gameState = 1;
       }
+*/
 
 // Square Nose crouches
   if(SquareNoseIsJumping == false) {
@@ -28,7 +35,7 @@ void inputs() {
 // move Lethal Mouse or Square Nose right and left
   if(playLethalMouse == true) {
     // Lethal Mouse: when pressing RIGHT or LEFT buttons
-    if(handGoesDown == true) {
+    if((handGoesDown == true) || (level == 3)) {
       if(SquareNoseIsJumping == false) {
         if(gb.buttons.repeat(BUTTON_RIGHT, 0) && (electricShock == false)) {
           SquareNoseGoesRight = true;
@@ -52,7 +59,7 @@ void inputs() {
       }
     }
 
-// moves Lethal Mouse right and left
+// moves Lethal Mouse right and left when it is mad
       if(LethalMouseMoves == true) {
         if((electricShock == true) && ((madLethalMouse % 5) == 0) && (madLethalMouse != 0) && (SquareNoseIsJumping == false)) {
           if(SquareNoseGoesRight == true) {
@@ -96,7 +103,7 @@ void inputs() {
 
 // Square Nose moves left and right
   } else {
-    if(handGoesDown == true) {
+    if((handGoesDown == true) || (level == 3)) {
       if((gb.buttons.repeat(BUTTON_RIGHT, 0)) && (SquareNoseX < (gb.display.width() - 10))) {
         SquareNoseX += 3;
         if(gb.buttons.repeat(BUTTON_DOWN, 0)) {
@@ -116,14 +123,15 @@ void inputs() {
   }
   
 // Square Nose jump
-  if((SquareNoseY == 28) && (gb.buttons.pressed(BUTTON_B)) && (electricShock == false)) {
+// 06-02-2020 change: button A for jumping instead of B
+  if((SquareNoseY == 28) && (gb.buttons.pressed(BUTTON_A)) && (electricShock == false)) {
     SquareNoseIsJumping = true;
     SquareNoseJumpSpeed = -6;
     if((electricShock == false) && (handGoesDown == true)) {
       gb.sound.playTick();
     }
   }
-  if((gb.buttons.released(BUTTON_B)) && (SquareNoseJumpSpeed < 0)) {
+  if((gb.buttons.released(BUTTON_A)) && (SquareNoseJumpSpeed < 0)) {
     SquareNoseJumpSpeed /= 2;
   }
 }
