@@ -26,7 +26,7 @@ void outputs() {
     gb.display.fillRect(0, 0, gb.display.width(), gb.display.width()/2);
   }
 
-// draw dark gray shapes on background in levels 1, 2 and 3
+// draw dark gray shapes on background in levels 1, 2, 3 and 4
   switch(level) {
 
     case 1:
@@ -58,7 +58,8 @@ void outputs() {
       break;
 
     case 3:
-        for(int row = 0; row < 5; row += 1) {
+    case 4: // same background for levels 3 and 4
+      for(int row = 0; row < 5; row += 1) {
         for(int column = 0; column < 10; column += 1) {
           int brickX = column * 8;
           int brickY = row * 8;
@@ -74,14 +75,22 @@ void outputs() {
   if(level != 0) {
 // draw the shadow of the numbers
     gb.display.setFontSize(2);
-    gb.display.setColor(DARKGRAY);
+    if(level == 4) {
+      gb.display.setColor(ORANGE);
+    } else {
+      gb.display.setColor(DARKGRAY);
+    }
     gb.display.setCursor(34, 16);
     if(collectedMeatyRings < 10) {
       gb.display.print("0");
     }
     gb.display.print(collectedMeatyRings);
-// draw the orange numbers
-    gb.display.setColor(ORANGE);
+// draw the orange numbers (or red if level is 4)
+    if(level == 4) {
+      gb.display.setColor(RED);
+    } else {
+      gb.display.setColor(ORANGE);
+    }
     gb.display.setCursor(33, 15);
     if(collectedMeatyRings < 10) {
       gb.display.print("0");
@@ -90,14 +99,24 @@ void outputs() {
   }
 
 // draw meaty ring or blue target
-  if((level != 0) && (endOfTest == false)) {
+// 06-02-2020 change: show meaty ring or blue target in level 0
+//  if((level != 0) && (endOfTest == false)) {
+  if(endOfTest == false) {
     if(playLethalMouse == true) {
 //      if((deadBird == false) && (deadBug == false) && (deadFrog == false) && (deadSquiddy == false) && (deadSquareNoseBall == false)) {
       if(electricShock == false) {
-        gb.display.drawImage(meatyRingX, meatyRingY, blueTarget);
+        if(level != 4) {
+          gb.display.drawImage(meatyRingX, meatyRingY, blueTarget);
+        } else {
+          gb.display.drawImage(meatyRingX, meatyRingY, meatyRing);
+        }
       }
     } else {
-      gb.display.drawImage(meatyRingX, meatyRingY, meatyRing);
+      if(level != 4) {
+          gb.display.drawImage(meatyRingX, meatyRingY, meatyRing);
+        } else {
+          gb.display.drawImage(meatyRingX, meatyRingY, blueTarget);
+        }
     }
   }
 
@@ -142,7 +161,9 @@ void outputs() {
 
     case 3:
 // Squiddy
-      gb.display.drawImage(SquiddyX, SquiddyY, Squiddy);
+      if(handGoesDown == true) {
+        gb.display.drawImage(SquiddyX, SquiddyY, Squiddy);
+      }
       if(deadSquiddy == true) {
         explosion(SquiddyX, SquiddyY, 10, 10);
       }
@@ -155,13 +176,114 @@ void outputs() {
         gb.display.drawImage(SquiddyBallX, SquiddyBallY, SquiddyBall);
       }
       break;
+
+      case 4:
+// draw Lethal Mouse CPU or Square Nose CPU
+
+  if(playLethalMouse == false) {
+    // draw Lethal Mouse
+    if(handGoesDown == true) {
+      if(CPUGoesRight == true) {
+        if(CPUIsJumping == true) {
+          gb.display.drawImage(CPUX, CPUY, SquiddyBall);
+        } else {
+          if(CPU_RIGHT == true) {
+            if((CPU_DOWN == true) && (CPUElectricShock == false)) {
+              gb.display.drawImage(CPUX, CPUY, SquiddyBall);
+            } else {
+              gb.display.drawImage(CPUX, CPUY, LethalMouseRunsRight);
+            }
+          } else {
+            if((CPU_DOWN == true) && (CPUElectricShock == false)) {
+              gb.display.drawImage(CPUX, CPUY, SquiddyBall);
+            } else {
+              if(LethalMouseCPUMoves == true) {
+                gb.display.drawImage(CPUX, CPUY, LethalMouseRunsRight);
+              } else {
+                gb.display.drawImage(CPUX, CPUY, LethalMouseBlinkRight);
+              }
+            }
+          }
+        }
+      } else {
+        if(CPUIsJumping == true) {
+          gb.display.drawImage(CPUX, CPUY, SquiddyBall);
+        } else {
+          if(CPU_LEFT == true) {
+            if((CPU_DOWN == true) && (CPUElectricShock == false)) {
+              gb.display.drawImage(CPUX, CPUY, SquiddyBall);
+            } else {
+              gb.display.drawImage(CPUX, CPUY, LethalMouseRunsLeft);
+            }
+          } else {
+            if((CPU_DOWN == true) && (CPUElectricShock == false)) {
+              gb.display.drawImage(CPUX, CPUY, SquiddyBall);
+            } else {
+              if(LethalMouseCPUMoves == true) {
+                gb.display.drawImage(CPUX, CPUY, LethalMouseRunsLeft);
+              } else {
+                gb.display.drawImage(CPUX, CPUY, LethalMouseBlinkLeft);
+              }
+            }
+          }
+        }
+      }
+    }
+  } else {
+// draw Square Nose
+    if(handGoesDown == true) {
+      if(CPUElectricShock == false) {
+        if(CPUGoesRight == true) {
+          if(CPUIsJumping == true) {
+            gb.display.drawImage(CPUX, CPUY, SN_ball_clock);
+          } else {
+            if(CPU_RIGHT == true) {
+              if(CPU_DOWN == true) {
+                gb.display.drawImage(CPUX, CPUY, SN_ball_clock);
+              } else {
+                gb.display.drawImage(CPUX, CPUY, SquareNoseRunsRight);
+              }
+            } else {
+              if(CPU_DOWN == true) {
+                gb.display.drawImage(CPUX, CPUY, SquareNoseBall);
+              } else {
+                gb.display.drawImage(CPUX, CPUY, SquareNoseRight);
+              }
+            }
+          }
+        } else {
+          if(CPUIsJumping == true) {
+            gb.display.drawImage(CPUX, CPUY, SN_ball_counter_clock);
+          } else {
+            if(CPU_LEFT == true) {
+              if(CPU_DOWN == true) {
+                gb.display.drawImage(CPUX, CPUY, SN_ball_counter_clock);
+              } else {
+                gb.display.drawImage(CPUX, CPUY, SquareNoseRunsLeft);
+              }
+            } else {
+              if(CPU_DOWN == true) {
+                gb.display.drawImage(CPUX, CPUY, SquareNoseBall);
+              } else {
+                gb.display.drawImage(CPUX, CPUY, SquareNoseLeft);
+              }
+            }
+          }
+        }
+      } else {
+        gb.display.drawImage(CPUElectricX, CPUElectricY, SquareNoseElectric);
+        explosion(CPUElectricX, CPUElectricY, 10, 12);
+      }
+    }
+  }
+  break;
   }
 
 // draw Lethal Mouse or Square Nose
 
   if(playLethalMouse == true) {
     // draw Lethal Mouse
-    if(handGoesDown == true) {
+    if((handGoesDown == true) || (level == 3)) {
       if(SquareNoseGoesRight == true) {
         if(SquareNoseIsJumping == true) {
           gb.display.drawImage(SquareNoseX, SquareNoseY, SquiddyBall);
@@ -210,7 +332,7 @@ void outputs() {
     }
   } else {
 // draw Square Nose
-    if(handGoesDown == true) {
+    if((handGoesDown == true) || (level == 3)) {
       if(electricShock == false) {
         if(SquareNoseGoesRight == true) {
           if(SquareNoseIsJumping == true) {
@@ -251,12 +373,15 @@ void outputs() {
         }
       } else {
         gb.display.drawImage(electricX, electricY, SquareNoseElectric);
+        if(level == 4) {
+          explosion(electricX, electricY, 10, 12);
+        }
       }
     }
   }
   
 // draw timer at the bottom of the screen
-  if(level != 0) {
+  if((level != 0) && (level != 4)) {
     gb.display.setFontSize(3);
 // make a sound the last tenth seconds before time over
 //(128 seconds or 2 minutes and 8 seconds)
@@ -337,22 +462,48 @@ void outputs() {
     }
   }
 
+  if(level == 4) {
+    gb.display.setFontSize(3);
+    gb.display.setColor(ORANGE);
+    gb.display.setCursor(6,45);
+    gb.display.print("DANGER");
+    gb.display.setColor(RED);
+    gb.display.setCursor(5,44);
+    gb.display.print("DANGER");
+  }
+
 // draw doctor Meggan arm
   if(handY > 0) {
-    gb.display.setColor(BEIGE);
-    gb.display.fillRect(SquareNoseX + 2, 0, 10, handY);
-    gb.display.setColor(BLACK);
-    gb.display.drawLine(SquareNoseX + 1, 0, SquareNoseX + 1, handY);
-    gb.display.drawLine(SquareNoseX + 12, 0, SquareNoseX + 12, handY);
+    if(level == 3) {
+      gb.display.setColor(BEIGE);
+      gb.display.fillRect(SquiddyX + 2, 0, 10, handY);
+      gb.display.setColor(BLACK);
+      gb.display.drawLine(SquiddyX + 1, 0, SquiddyX + 1, handY);
+      gb.display.drawLine(SquiddyX + 12, 0, SquiddyX + 12, handY);
+    } else {
+      gb.display.setColor(BEIGE);
+      gb.display.fillRect(SquareNoseX + 2, 0, 10, handY);
+      gb.display.setColor(BLACK);
+      gb.display.drawLine(SquareNoseX + 1, 0, SquareNoseX + 1, handY);
+      gb.display.drawLine(SquareNoseX + 12, 0, SquareNoseX + 12, handY);
+    }
   }
 // draw doctor Meggan hand
   if(handGoesDown) {
-    gb.display.drawImage(SquareNoseX, handY, openHand);
-  } else {
-    if(playLethalMouse == true) {
-      gb.display.drawImage(SquareNoseX, handY, LethalMouseCaptured);
+    if(level == 3) {
+      gb.display.drawImage(SquiddyX, handY, openHand);
     } else {
-      gb.display.drawImage(SquareNoseX, handY, closedHand);
+      gb.display.drawImage(SquareNoseX, handY, openHand);
     }
-  }
+  } else {
+    if(level == 3) {
+      gb.display.drawImage(SquiddyX, handY, handSquiddy);
+    } else {
+      if(playLethalMouse == true) {
+        gb.display.drawImage(SquareNoseX, handY, LethalMouseCaptured);
+      } else {
+        gb.display.drawImage(SquareNoseX, handY, closedHand);
+      }
+    }
+  } 
 }
