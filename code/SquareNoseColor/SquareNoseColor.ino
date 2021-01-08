@@ -2,6 +2,8 @@
 // adding Lethal Mouse and cheat code for level selection
 // last update: 17-06-2019
 
+// (some changes: 06-02-2020) adding a boss/level 4: 08-04-2020
+
 #include <Gamebuino-Meta.h>
 
 // position of letter "O" in title screen changes with Lethal Mouse
@@ -176,6 +178,28 @@ bool electricShock = false;
 int electricX = 0;
 int electricY = 0;
 
+// CPU
+int CPUX = 54;
+int CPUY = 28;
+bool CPUGoesRight = false;
+bool CPUIsJumping = false;
+int CPUJumpSpeed = 0;
+int CPUJumpCounter = 0;
+bool CPUElectricShock = false;
+int CPUElectricX = 0;
+int CPUElectricY = 0;
+bool CPUChasing = false;
+int CPUDelay = 0;
+
+// CPU virtual buttons (used in CPUBrain)
+bool CPU_LEFT = false;
+bool CPU_RIGHT = false;
+bool CPU_DOWN = false;
+bool CPU_A = false;  // this could be unused
+bool CPU_pressedA = false;
+bool CPU_releasedA = false;  // this could be unused
+bool LethalMouseCPUMoves = false;
+
 // meaty ring
 int meatyRingX = 52;
 int meatyRingY = 8;
@@ -225,7 +249,6 @@ bool LethalMouseMoves = false;
 int madLethalMouse = 0;
 int colorNumber = 0;
 
-//
 int gameLoopNumbersX = 31;
 
 bool deadBird = false;
@@ -233,6 +256,9 @@ bool deadBug = false;
 bool deadFrog = false;
 bool deadSquiddy = false;
 bool deadSquareNoseBall = false;
+
+// 06-02-2020 change: screens between levels stop after 3 seconds
+int goToLevel = 0;
 
 void setup() {
   gb.begin();
@@ -261,7 +287,9 @@ void loop() {
       }
 
 // choose to play with Lethal Mouse or Square Nose
-      if((gb.buttons.repeat(BUTTON_B, 0)) && (gb.buttons.pressed(BUTTON_UP))) {
+// 06-02-2020 change: button B only to change caracter in title screen
+//      if((gb.buttons.repeat(BUTTON_B, 0)) && (gb.buttons.pressed(BUTTON_UP))) {
+      if(gb.buttons.pressed(BUTTON_B)) {
         if(playLethalMouse == false) {
           playLethalMouse = true;
           gameLoopNumbersX = 26;
@@ -305,7 +333,7 @@ void loop() {
         }
       } else {
 // level selection
-        if((gb.buttons.pressed(BUTTON_RIGHT)) && (level < 3)) {
+        if((gb.buttons.pressed(BUTTON_RIGHT)) && (level < 4)) {
           level += 1;
         }
         if((gb.buttons.pressed(BUTTON_LEFT)) && (level > 0)) {
@@ -315,7 +343,7 @@ void loop() {
 // go to playable levels      
       if(gb.buttons.pressed(BUTTON_A)) {
         if((selectLevel == false) || (level == 0)) {
-          gameState = 2; // playable level 0 (wild nature)
+          gameState = 2; // playable level 0 (wild nature or factory)
         } else {
           level -= 1;
           gameState = 3; // presentation screens
@@ -328,8 +356,24 @@ void loop() {
 // game
     case 2:
       inputs();
+// 09-04-2020 adding 4th level boss behaviour
+      if(level == 4) {
+        CPUBrain();
+        CPUInputs();
+      }
       updates();
       outputs();
+// 06-02-2020 change: this part was placed in inputs
+// restart the game if you lose
+      if((electricShock == true) && (gb.buttons.pressed(BUTTON_A))) {
+        level = 0;
+        gameLoop = 0;
+        resetValues();
+        frameCounter = 0;
+        seconds = 0;
+        minutes = 0;
+        gameState = 1;
+      }
       break;
 
 // screens between the levels
@@ -505,9 +549,14 @@ void loop() {
         }
 */
 
-// got to next level or go back to title screen      
-      if(gb.buttons.pressed(BUTTON_A)) {
-        if(level == 3) {
+// got to next level or go back to title screen 
+// 06-02-2020 change: go to level after 3 seconds or press A
+//      if(gb.buttons.pressed(BUTTON_A)) {
+      if(goToLevel < 80) {
+        goToLevel += 1;
+      }
+      if((gb.buttons.pressed(BUTTON_A)) || (goToLevel > 70)) {
+        if(level == 4) {
           level = 0;
           gameLoop += 1;
           frameCounter = 0;
@@ -521,6 +570,7 @@ void loop() {
           sentenceNumber = random(0, 18);
         }
         smallMove = 0;
+        goToLevel = 0;
       }
       break;
   }
