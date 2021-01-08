@@ -6,15 +6,14 @@ STORY:
 You are an innocent squarrel trapped in a dry pet food laboratory. The doctor Meggan will record the time you spent to eat the 32 meaty rings of each test chamber. She is hired by True Pasta corp to find the best dry food recipe of the world.
 
 CONTROLS:
-- A : start
+- A : start / jump
 - LEFT / RIGHT : run
-- B : jump
 - DOWN : crounch
 - DOWN + LEFT / DOWN + RIGHT : roll
 
 HARD MODE:
 
-Hold B and press UP in title screen to play with Lethal Mouse, a robot toy prototype who has to past tests to prove it is not dangerous.
+Press B in title screen to play with Lethal Mouse, a robot toy prototype who has to past tests to prove it is not dangerous.
 
 LICENSE:
 
